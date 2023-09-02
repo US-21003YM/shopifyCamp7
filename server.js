@@ -6,6 +6,9 @@ const compression = require('compression');
 const express = require('express');
 const morgan = require('morgan');
 const {createStorefrontClient, InMemoryCache} = require('@shopify/hydrogen');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 installGlobals();
 
@@ -37,7 +40,7 @@ app.all(
   process.env.NODE_ENV === 'development'
     ? async (req, res, next) => {
         const context = await getContext(req);
-
+        
         purgeRequireCache();
 
         return createRequestHandler({
@@ -48,7 +51,7 @@ app.all(
       }
     : async (req) => {
         const context = await getContext(req);
-        console.log(BUILD_DIR);
+        
         return createRequestHandler({
           build: require(BUILD_DIR),
           mode: process.env.NODE_ENV,
@@ -88,9 +91,9 @@ async function getContext(req) {
     // publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
     // privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
     // storeDomain: env.PUBLIC_STORE_DOMAIN,
-    publicStorefrontToken: '5ae809973e0476d20e219bacd13158e3',
-    privateStorefrontToken: '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',
-    storeDomain: 'hydrogen-store-unitysoft1.myshopify.com',
+    publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+    privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
+    storeDomain: env.PUBLIC_STORE_DOMAIN,
     storefrontId: env.PUBLIC_STOREFRONT_ID,
     storefrontHeaders: {
       requestGroupId: req.get('request-id'),
