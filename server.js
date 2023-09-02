@@ -48,7 +48,7 @@ app.all(
       }
     : async (req) => {
         const context = await getContext(req);
-
+        console.log(BUILD_DIR);
         return createRequestHandler({
           build: require(BUILD_DIR),
           mode: process.env.NODE_ENV,
