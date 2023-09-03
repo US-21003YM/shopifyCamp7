@@ -1,11 +1,16 @@
 const path = require('path');
 
 const {createRequestHandler} = require('@remix-run/express');
-const {installGlobals, createCookieSessionStorage} = require('@remix-run/node');
+const {installGlobals, createCookieSessionStorage,} = require('@remix-run/node');
 const compression = require('compression');
 const express = require('express');
 const morgan = require('morgan');
-const {createStorefrontClient, InMemoryCache} = require('@shopify/hydrogen');
+const {
+  createStorefrontClient,
+  InMemoryCache,
+  createCartHandler,
+  cartGetIdDefault,
+  cartSetIdDefault,} = require('@shopify/hydrogen');
 const { configDotenv } = require('dotenv');
 
 configDotenv();
@@ -80,7 +85,7 @@ function purgeRequireCache() {
 
 async function getContext(req) {
   const session = await HydrogenSession.init(req, [env.SESSION_SECRET]);
-  console.log(session);
+  
   const {storefront} = createStorefrontClient({
     // A [`cache` instance](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is necessary for sub-request caching to work.
     // We provide only an in-memory implementation
@@ -88,12 +93,9 @@ async function getContext(req) {
     // `waitUntil` is only needed on worker environments. For Express/Node, it isn't applicable
     waitUntil: null,
     i18n: {language: 'EN', country: 'US'},
-    // publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-    // privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
-    // storeDomain: env.PUBLIC_STORE_DOMAIN,
-    publicStorefrontToken: '5ae809973e0476d20e219bacd13158e3',
-    privateStorefrontToken: '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',
-    storeDomain: 'hydrogen-store-unitysoft1.myshopify.com',
+    publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+    privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
+    storeDomain: env.PUBLIC_STORE_DOMAIN,
     storefrontId: env.PUBLIC_STOREFRONT_ID,
     storefrontHeaders: {
       requestGroupId: req.get('request-id'),
@@ -101,8 +103,16 @@ async function getContext(req) {
       cookie: req.get('cookie'),
     },
   });
-
-  return {session, storefront, env};
+  
+  const cart = createCartHandler({
+    storefront,
+    getCartId: cartGetIdDefault(req),
+    setCartId: cartSetIdDefault({
+      maxage: 60 * 60 * 24 * 365, // 1 year expiry
+    }),
+  });
+  
+  return {session, storefront, env, cart};
 }
 
 class HydrogenSession {

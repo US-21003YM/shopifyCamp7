@@ -4,7 +4,6 @@ import {
   Meta,
   Outlet,
   Scripts,
-  LiveReload,
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react';
@@ -12,6 +11,7 @@ import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Layout} from '~/components/Layout';
 import styles from './styles/app.css';
 import favicon from '../public/favicon.svg';
+import {Seo} from '@shopify/hydrogen';
 import {useNonce} from '@shopify/hydrogen';
 
 export const links: LinksFunction = () => {
@@ -30,36 +30,11 @@ export const links: LinksFunction = () => {
 };
 
 export async function loader({context}: LoaderArgs) {
-  const [customerAccessToken, cartId] = await Promise.all([
-    context.session.get('customerAccessToken'),
-    context.session.get('cartId'),
-  ]);
-
-  const [cart, layout] = await Promise.all([
-    cartId
-      ? (
-          await context.storefront.query<{cart: Cart}>(CART_QUERY, {
-            variables: {
-              cartId,
-              /**
-              Country and language properties are automatically injected
-              into all queries. Passing them is unnecessary unless you
-              want to override them from the following default:
-              */
-              country: context.storefront.i18n?.country,
-              language: context.storefront.i18n?.language,
-            },
-            cache: context.storefront.CacheNone(),
-          })
-        ).cart
-      : null,
-    await context.storefront.query<{shop: Shop}>(LAYOUT_QUERY),
-  ]);
+  const {cart} = context;
 
   return defer({
-    isLoggedIn: Boolean(customerAccessToken),
     cart,
-    layout,
+    layout: await context.storefront.query(LAYOUT_QUERY),
   });
 }
 
@@ -68,22 +43,23 @@ export default function App() {
   const nonce = useNonce();
 
   const {name, description} = data.layout.shop;
+  const title = description ? `${name} ${description}` : name;
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Seo />
         <Meta />
         <Links />
       </head>
       <body>
-        <Layout description={description} title={name}>
+        <Layout title={title}>
           <Outlet />
         </Layout>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
-        <LiveReload nonce={nonce} />
       </body>
     </html>
   );

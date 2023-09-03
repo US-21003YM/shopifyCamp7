@@ -4,6 +4,7 @@
 const { Storefront } = require('@shopify/hydrogen');
 
 const AppLoadContext = {
+  tailwind: true,
   session: {
     /** 
      * @param {string} key 
@@ -44,15 +45,16 @@ const AppLoadContext = {
       // Mock implementation
     }
   },
+  future: {
+    v2_dev: true,
+    v2_meta: true,
+    v2_headers: true,
+    v2_errorBoundary: true,
+    v2_routeConvention: true,
+    v2_normalizeFormMethod: true,
+  },
 
   storefront: Storefront,  // This is just a mock reference for demonstration
-
-  env: {
-    SESSION_SECRET: '34893h40chdcnmd30dm3md3xch7erfera0',
-    PUBLIC_STOREFRONT_API_TOKEN: '5ae809973e0476d20e219bacd13158e3',
-    PRIVATE_STOREFRONT_API_TOKEN: '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',
-    PUBLIC_STORE_DOMAIN: 'hydrogen-store-unitysoft1.myshopify.com'
-  }
 };
 
 module.exports = AppLoadContext;
