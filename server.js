@@ -49,14 +49,14 @@ app.all(
           getLoadContext: () => context,
         })(req, res, next);
       }
-    : async (req) => {
+    : async (req, res) => {
         const context = await getContext(req);
         
         return createRequestHandler({
           build: require(BUILD_DIR),
           mode: process.env.NODE_ENV,
           getLoadContext: () => context,
-        });
+        })(req, res);
       },
 );
 const port = process.env.PORT || 3000;
@@ -80,7 +80,7 @@ function purgeRequireCache() {
 
 async function getContext(req) {
   const session = await HydrogenSession.init(req, [env.SESSION_SECRET]);
-  
+  console.log(session);
   const {storefront} = createStorefrontClient({
     // A [`cache` instance](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is necessary for sub-request caching to work.
     // We provide only an in-memory implementation
