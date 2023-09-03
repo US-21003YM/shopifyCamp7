@@ -6,7 +6,7 @@
 
 import {PassThrough} from 'node:stream';
 
-import type {AppLoadContext, EntryContext} from '@remix-run/node';
+import {AppLoadContext, EntryContext} from '@remix-run/node';
 import {Response} from '@remix-run/node';
 import {RemixServer} from '@remix-run/react';
 import isbot from 'isbot';
@@ -16,11 +16,11 @@ import {createContentSecurityPolicy} from '@shopify/hydrogen';
 const ABORT_DELAY = 5_000;
 
 export default function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-  loadContext: AppLoadContext,
+  request,
+  responseStatusCode,
+  responseHeaders,
+  remixContext,
+  loadContext
 ) {
   return isbot(request.headers.get('user-agent'))
     ? handleBotRequest(
@@ -38,10 +38,10 @@ export default function handleRequest(
 }
 
 function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
+  request,
+  responseStatusCode,
+  responseHeaders,
+  remixContext,
 ) {
   return new Promise((resolve, reject) => {
     const {nonce, header, NonceProvider} = createContentSecurityPolicy();
@@ -71,10 +71,10 @@ function handleBotRequest(
 
           pipe(body);
         },
-        onShellError(error: unknown) {
+        onShellError(error) {
           reject(error);
         },
-        onError(error: unknown) {
+        onError(error) {
           responseStatusCode = 500;
           console.error(error);
         },
@@ -86,10 +86,10 @@ function handleBotRequest(
 }
 
 function handleBrowserRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
+  request,
+  responseStatusCode,
+  responseHeaders,
+  remixContext,
 ) {
   const {nonce, header, NonceProvider} = createContentSecurityPolicy();
   
@@ -119,10 +119,10 @@ function handleBrowserRequest(
 
           pipe(body);
         },
-        onShellError(error: unknown) {
+        onShellError(error) {
           reject(error);
         },
-        onError(error: unknown) {
+        onError(error) {
           console.error(error);
           responseStatusCode = 500;
         },

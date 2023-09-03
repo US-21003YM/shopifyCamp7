@@ -117,7 +117,7 @@ function ItemRemoveButton({lineIds}) {
   
   export function CartActions({checkoutUrl}) {
     if (!checkoutUrl) return null;
-  
+    
     return (
       <div className="flex flex-col mt-2">
         <a

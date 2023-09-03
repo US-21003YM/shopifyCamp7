@@ -1,4 +1,4 @@
-import {defer, type LinksFunction, type LoaderArgs} from '@remix-run/node';
+import {defer, LinksFunction, LoaderArgs} from '@remix-run/node';
 import {
   Links,
   Meta,
@@ -7,14 +7,13 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react';
-import type {Cart, Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Layout} from '~/components/Layout';
 import styles from './styles/app.css';
 import favicon from '../public/favicon.svg';
 import {Seo} from '@shopify/hydrogen';
 import {useNonce} from '@shopify/hydrogen';
 
-export const links: LinksFunction = () => {
+export const links = () => {
   return [
     {rel: 'stylesheet', href: styles},
     {
@@ -29,17 +28,17 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export async function loader({context}: LoaderArgs) {
+export async function loader({context}) {
   const {cart} = context;
-
+  
   return defer({
-    cart,
+    cart: cart.get(),
     layout: await context.storefront.query(LAYOUT_QUERY),
   });
 }
 
 export default function App() {
-  const data = useLoaderData<typeof loader>();
+  const data = useLoaderData();
   const nonce = useNonce();
 
   const {name, description} = data.layout.shop;
